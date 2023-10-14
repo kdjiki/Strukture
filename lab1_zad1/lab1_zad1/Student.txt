@@ -1,2 +1,6 @@
-djue dujic 10
+djue dujic 10.2
 klara klaric 23
+ante antic 56
+ivo ivic 98
+mate matic 93
+ana anic 82
