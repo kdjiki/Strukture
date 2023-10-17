@@ -17,20 +17,38 @@ relatvan_br_bodova = br_bodova/max_br_bodova*100
 #define FILE_ERROR_OPEN (-1)
 
 typedef struct _student {
-	char name[MAX_SIZE];
-	char surname[MAX_SIZE];
-	double points;
+	char ime[MAX_SIZE];
+	char prezime[MAX_SIZE];
+	double bodovi;
 }Student;
 
-//Funkcija sluzi za prebrojavanje redova u datoteci
-int readNoRowsInFIle()
+int PrebrojiRedove();
+void Ucitavanje(int, Student*);
+void Ispis(int, Student*);
+
+int main()
 {
-	int counter = 0;
+	Student* nizStruktura = NULL;
+	int BrRedova=0;
+	BrRedova = PrebrojiRedove();
+
+	printf("%d\n", BrRedova);
+	nizStruktura = (Student*)malloc(BrRedova * sizeof(Student));
+	Ucitavanje(BrRedova, nizStruktura);
+	Ispis(BrRedova, nizStruktura);
+
+	return EXIT_SUCCESS;
+}
+
+//Funkcija prebrojava redova u datoteci
+int PrebrojiRedove()
+{
+	int brojac = 0;
 	FILE* filePointer = NULL;
 	char buffer[MAX_LINE] = { 0 };
 
-	filePointer = fopen("Student.txt", "r");
-	//Ako se datoteka ne uspije otvoriti, program zavrsava
+	filePointer = fopen("C:\\Users\\Kreso\\.ssh\\Strukture\\lab1_zad1\\lab1_zad1\\Student.txt", "r");
+	//Ako se datoteka ne uspije otvoriti, program zavrsava i vraca vrijednos -1
 	if (!filePointer) {
 		printf("File is not open!\n");
 		return FILE_ERROR_OPEN;
@@ -40,66 +58,52 @@ int readNoRowsInFIle()
 	while (!feof(filePointer))
 	{
 		fgets(buffer, MAX_LINE, filePointer);
-		counter++;
+		brojac++;
 	}
-		fclose(filePointer);
-		return counter;
+	fclose(filePointer);
+	return brojac;
 }
+
 //Funkcija ucitava podatke iz datoteke i sprema ih u niz struktura
 void Ucitavanje(int noRows, Student* nizStruktura)
 {
 	FILE* filePointer = NULL;
 	int i = 0;
-	
-	filePointer = fopen("Student.txt", "r");
+
+	filePointer = fopen("C:\\Users\\Kreso\\.ssh\\Strukture\\lab1_zad1\\lab1_zad1\\Student.txt", "r");
 	if (!filePointer) {
 		printf("File is not open!\n");
 		return FILE_ERROR_OPEN;
 	}
-	
+
 	for (i = 0; i < noRows; i++)
 	{
-		fscanf(filePointer, "%s", nizStruktura[i].name);
-		fscanf(filePointer, "%s", nizStruktura[i].surname);
-		fscanf(filePointer, "%lf", &nizStruktura[i].points);
-	}	
+		fscanf(filePointer, "%s", nizStruktura[i].ime);
+		fscanf(filePointer, "%s", nizStruktura[i].prezime);
+		fscanf(filePointer, "%lf", &nizStruktura[i].bodovi);
+	}
 	fclose(filePointer);
-
 }
-//Funkcija za izracunavanje relat. br. bodova i ispis podataka
-void Ispis(int noRows, Student* nizStruktura)
-{
-	int i = 0, maxPoints=0;
 
-	for (i = 0; i < noRows; i++)
+//Funkcija za izracunavanje relat. br. bodova i ispis podataka
+void Ispis(int BrRedova, Student* nizStruktura)
+{
+	int i = 0, maxBod = 0;
+
+	for (i = 0; i < BrRedova; i++)
 	{
-		if (nizStruktura[i].points > maxPoints)
+		if (nizStruktura[i].bodovi > maxBod)
 		{
-			maxPoints = nizStruktura[i].points;
+			maxBod = nizStruktura[i].bodovi;
 		}
 	}
 	printf("IME PREZIME	BR.BODOVA	RELAT.BR.BODOVA\n");
-	for (i = 0; i < noRows; i++)
+	for (i = 0; i < BrRedova; i++)
 	{
-		printf("%s ", nizStruktura[i].name);
-		printf("%s	", nizStruktura[i].surname);
-		printf("%.3lf		", nizStruktura[i].points);
-		printf("%.3lf\n", nizStruktura[i].points/maxPoints*100);
+		printf("%s ", nizStruktura[i].ime);
+		printf("%s	", nizStruktura[i].prezime);
+		printf("%.3lf		", nizStruktura[i].bodovi);
+		printf("%.3lf\n", nizStruktura[i].bodovi / maxBod * 100);
 	}
 
-}
-
-
-int main()
-{
-	Student* nizStruktura = NULL;
-	int noRows=0;
-	noRows = readNoRowsInFIle();
-
-	printf("%d\n", noRows);
-	nizStruktura = (Student*)malloc(noRows * sizeof(Student));
-	Ucitavanje(noRows, nizStruktura);
-	Ispis(noRows, nizStruktura);
-
-	return EXIT_SUCCESS;
 }
