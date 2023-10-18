@@ -17,37 +17,39 @@ relatvan_br_bodova = br_bodova/max_br_bodova*100
 #define FILE_ERROR_OPEN (-1)
 
 typedef struct _student {
-	char ime[MAX_SIZE];
-	char prezime[MAX_SIZE];
-	double bodovi;
+	char name[MAX_SIZE];
+	char surname[MAX_SIZE];
+	double points;
 }Student;
 
-int PrebrojiRedove();
-void Ucitavanje(int, Student*);
-void Ispis(int, Student*);
+int readNoRowsInFile();
+int loadingData(int, Student*);
+int output(int, Student*);
+int relPoints(int, Student*);
 
 int main()
 {
-	Student* nizStruktura = NULL;
-	int BrRedova=0;
-	BrRedova = PrebrojiRedove();
+	Student* seriesOfStructure = NULL;
+	int noRows = 0;
+	noRows = readNoRowsInFile();
 
-	printf("%d\n", BrRedova);
-	nizStruktura = (Student*)malloc(BrRedova * sizeof(Student));
-	Ucitavanje(BrRedova, nizStruktura);
-	Ispis(BrRedova, nizStruktura);
+	printf("%d\n", noRows);
+	seriesOfStructure = (Student*)malloc(noRows * sizeof(Student));
+	loadingData(noRows, seriesOfStructure);
+	output(noRows, seriesOfStructure);
+	free(seriesOfStructure);
 
 	return EXIT_SUCCESS;
 }
 
 //Funkcija prebrojava redova u datoteci
-int PrebrojiRedove()
+int readNoRowsInFile()
 {
-	int brojac = 0;
+	int counter = 0;
 	FILE* filePointer = NULL;
 	char buffer[MAX_LINE] = { 0 };
 
-	filePointer = fopen("C:\\Users\\Kreso\\.ssh\\Strukture\\lab1_zad1\\lab1_zad1\\Student.txt", "r");
+	filePointer = fopen("Student.txt", "r");
 	//Ako se datoteka ne uspije otvoriti, program zavrsava i vraca vrijednos -1
 	if (!filePointer) {
 		printf("File is not open!\n");
@@ -58,19 +60,19 @@ int PrebrojiRedove()
 	while (!feof(filePointer))
 	{
 		fgets(buffer, MAX_LINE, filePointer);
-		brojac++;
+		counter++;
 	}
 	fclose(filePointer);
-	return brojac;
+	return counter;
 }
 
 //Funkcija ucitava podatke iz datoteke i sprema ih u niz struktura
-void Ucitavanje(int noRows, Student* nizStruktura)
+int loadingData(int noRows, Student* seriesOfStructure)
 {
 	FILE* filePointer = NULL;
 	int i = 0;
 
-	filePointer = fopen("C:\\Users\\Kreso\\.ssh\\Strukture\\lab1_zad1\\lab1_zad1\\Student.txt", "r");
+	filePointer = fopen("Student.txt", "r");
 	if (!filePointer) {
 		printf("File is not open!\n");
 		return FILE_ERROR_OPEN;
@@ -78,32 +80,40 @@ void Ucitavanje(int noRows, Student* nizStruktura)
 
 	for (i = 0; i < noRows; i++)
 	{
-		fscanf(filePointer, "%s", nizStruktura[i].ime);
-		fscanf(filePointer, "%s", nizStruktura[i].prezime);
-		fscanf(filePointer, "%lf", &nizStruktura[i].bodovi);
+		fscanf(filePointer, "%s", seriesOfStructure[i].name);
+		fscanf(filePointer, "%s", seriesOfStructure[i].surname);
+		fscanf(filePointer, "%lf", &seriesOfStructure[i].points);
 	}
 	fclose(filePointer);
+	return 0;
 }
 
 //Funkcija za izracunavanje relat. br. bodova i ispis podataka
-void Ispis(int BrRedova, Student* nizStruktura)
+int output(int noRows, Student* seriesOfStructure)
 {
-	int i = 0, maxBod = 0;
-
-	for (i = 0; i < BrRedova; i++)
+	int i = 0,maxPoints=0;
+	maxPoints = relPoints(noRows,seriesOfStructure);
+	printf("IME PREZIME	BR.BODOVA	RELAT.BR.BODOVA\n");
+	for (i = 0; i < noRows; i++)
 	{
-		if (nizStruktura[i].bodovi > maxBod)
+		printf("%s ", seriesOfStructure[i].name);
+		printf("%s	", seriesOfStructure[i].surname);
+		printf("%.3lf		", seriesOfStructure[i].points);
+		printf("%.3lf\n", seriesOfStructure[i].points / maxPoints * 100);
+	}
+	return 0;
+}
+
+int relPoints(int noRows, Student* seriesOfStructure)
+{
+	int i=0, maxpoints = 0;
+
+	for (i = 0; i < noRows; i++)
+	{
+		if (seriesOfStructure[i].points > maxpoints)
 		{
-			maxBod = nizStruktura[i].bodovi;
+			maxpoints = seriesOfStructure[i].points;
 		}
 	}
-	printf("IME PREZIME	BR.BODOVA	RELAT.BR.BODOVA\n");
-	for (i = 0; i < BrRedova; i++)
-	{
-		printf("%s ", nizStruktura[i].ime);
-		printf("%s	", nizStruktura[i].prezime);
-		printf("%.3lf		", nizStruktura[i].bodovi);
-		printf("%.3lf\n", nizStruktura[i].bodovi / maxBod * 100);
-	}
-
+	return maxpoints;
 }

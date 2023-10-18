@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "task-Student",
+      "appliesTo": "lab1_zad1/lab1_zad1/Student.txt",
+      "type": "launch"
+    },
+    {
+      "taskLabel": "task-lab1_zad1",
+      "appliesTo": "lab1_zad1/lab1_zad1/",
+      "type": "launch"
+    }
+  ]
+}
