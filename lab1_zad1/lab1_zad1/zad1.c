@@ -15,6 +15,7 @@ relatvan_br_bodova = br_bodova/max_br_bodova*100
 #define MAX_SIZE (50)
 #define MAX_LINE (1024)
 #define FILE_ERROR_OPEN (-1)
+#define MALLOC_ERROR (-2)
 
 typedef struct _student {
 	char name[MAX_SIZE];
@@ -35,6 +36,11 @@ int main()
 
 	printf("%d\n", noRows);
 	seriesOfStructure = (Student*)malloc(noRows * sizeof(Student));
+	if (seriesOfStructure == NULL)
+	{
+		printf("ERROR\n");
+		return MALLOC_ERROR;
+	}
 	loadingData(noRows, seriesOfStructure);
 	output(noRows, seriesOfStructure);
 	free(seriesOfStructure);
