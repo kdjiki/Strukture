@@ -1,0 +1,8 @@
+NAME	SURNAME		BIRTH YEAR
+Ante	Antic		2002
+Duje	Dujic		2003
+Ivo	Ivic		2001
+Josip	Josic		1998
+Mate	Matic		1999
+Pero	Peric		2000
+Stipe	Stipic		2001

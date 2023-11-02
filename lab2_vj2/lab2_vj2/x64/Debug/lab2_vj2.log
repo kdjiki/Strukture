@@ -1,4 +1,4 @@
 ﻿  zad2.c
-C:\Users\Kreso\.ssh\Strukture\lab2_vj2\lab2_vj2\zad2.c(41,7): warning C4047: 'initializing': 'char' differs in levels of indirection from 'char [2]'
-C:\Users\Kreso\.ssh\Strukture\lab2_vj2\lab2_vj2\zad2.c(80,3): warning C4047: 'return': 'Position' differs in levels of indirection from 'int'
+C:\Users\Kreso\.ssh\Strukture\lab2_vj2\lab2_vj2\zad2.c(63,7): warning C4047: 'initializing': 'char' differs in levels of indirection from 'char [2]'
+C:\Users\Kreso\.ssh\Strukture\lab2_vj2\lab2_vj2\zad2.c(123,3): warning C4047: 'return': 'Position' differs in levels of indirection from 'int'
   lab2_vj2.vcxproj -> C:\Users\Kreso\.ssh\Strukture\lab2_vj2\x64\Debug\lab2_vj2.exe

@@ -27,6 +27,7 @@ int readNoRowsInFile();
 int loadingData(int, Student*);
 int output(int, Student*);
 int relPoints(int, Student*);
+Student* memoryAllocation(Student *,int);
 
 int main()
 {
@@ -35,12 +36,7 @@ int main()
 	noRows = readNoRowsInFile();
 
 	printf("%d\n", noRows);
-	seriesOfStructure = (Student*)malloc(noRows * sizeof(Student));
-	if (seriesOfStructure == NULL)
-	{
-		printf("ERROR\n");
-		return MALLOC_ERROR;
-	}
+	seriesOfStructure = memoryAllocation(seriesOfStructure,noRows);
 	loadingData(noRows, seriesOfStructure);
 	output(noRows, seriesOfStructure);
 	free(seriesOfStructure);
@@ -122,4 +118,14 @@ int relPoints(int noRows, Student* seriesOfStructure)
 		}
 	}
 	return maxpoints;
+}
+Student* memoryAllocation(Student* ptr, int n)
+{
+	ptr = (Student*)malloc(n * sizeof(Student));
+	if (ptr == NULL)
+	{
+		printf("ERROR\n");
+		return NULL;
+	}
+	return ptr;
 }
