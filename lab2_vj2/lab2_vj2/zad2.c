@@ -54,6 +54,7 @@ int sort(Position);
 int writeInFile(Position);
 int readFromFile(Position);
 int noRows();
+int freeMemory(Position);
 
 
 int main()
@@ -100,8 +101,12 @@ int main()
 		case 'D':
 			deletePerson(head);
 			break;
+		case 'M':
+			freeMemory(head);
+			break;
 		case 'X':
 			i = 0;
+			freeMemory(head);
 			free(head);
 			return EXIT_SUCCESS;
 			break;
@@ -131,7 +136,7 @@ Position initialization(Position p)
 //Izbornik koji korisniku prikazuje opcije
 int menu()
 {
-	printf("Enter 'A' to add a member to the beginning:\nEnter 'E' to add a member to the end of list:\nEnter 'P' to print the list:\nEnter 'B' to add a member behind the person:\nEnter 'C' to add a member in front of the person:\nEnter 'W' for writing in file:\nEnter 'R' for reading from a file:\nEnter 'S' to sort the list:\nEnter 'F' to search for a person by surname:\nEnter 'D' to delete a person:\nEnter 'X' for exit:\n");
+	printf("Enter 'A' to add a member to the beginning:\nEnter 'E' to add a member to the end of list:\nEnter 'P' to print the list:\nEnter 'B' to add a member behind the person:\nEnter 'C' to add a member in front of the person:\nEnter 'W' for writing in file:\nEnter 'R' for reading from a file:\nEnter 'S' to sort the list:\nEnter 'F' to search for a person by surname:\nEnter 'D' to delete a person:\nEnter 'M' to delete the entire liste: \nEnter 'X' for exit:\n");
 
 	return 0;
 }
@@ -399,7 +404,7 @@ int readFromFile(Position p)
 	size = noRows();
 	temp = p;
 	fgets(buffer, MAX_LINE, filePointer);
-	for ( i=0;i < size;i++)
+	for ( i=0;i < size-1;i++)
 	{
 		Position newPerson = NULL;
 		newPerson=(Position)malloc(sizeof(Person));
@@ -435,4 +440,17 @@ int noRows()
 	}
 	//Vraca counter umanjen za 1 zbog prvog reda u datoteci koji nije osoba vec slozi za pojasnjenje unesenih podataka
 	return (counter-1);
+}
+int freeMemory(Position p)
+{
+	Position temp = NULL;
+
+	while (p->next != NULL)
+	{
+		temp = p->next;
+		p->next = temp->next;
+		free(temp);
+	}
+
+	return EXIT_SUCCESS;
 }

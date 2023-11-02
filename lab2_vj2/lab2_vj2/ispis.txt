@@ -1,8 +1,11 @@
 NAME	SURNAME		BIRTH YEAR
-Ante	Antic		2002
+Ana	Anic		2001
 Duje	Dujic		2003
 Ivo	Ivic		2001
 Josip	Josic		1998
+Kate	Katic		2003
+Klara	Klaric		1998
+Maja	Majic		2005
 Mate	Matic		1999
 Pero	Peric		2000
 Stipe	Stipic		2001
