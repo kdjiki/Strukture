@@ -27,9 +27,8 @@ int readFile(Position,Position);
 int printPoly(Position);
 int scanInList(Position, int, int);
 int sumPoly(Position,Position,Position);
-int multiPoly(Position,Position,Position);
-int sort(Position);
-int deleteAll(Position );
+int multiPoly(Position, Position, Position);
+int deleteAll(Position);
 
 int main()
 {
@@ -82,7 +81,7 @@ Position initialization(Position p)
 	return p;
 }
 
-int readFile(Position hp1, Position hp2)
+int readFile(Position headPoly1, Position headPoly2)
 {
 	char buffer[MAX_LINE] = {0};
 	int tempBuff = 0, tempExp=0,tempCoef=0, bufferCounter=0;
@@ -100,7 +99,7 @@ int readFile(Position hp1, Position hp2)
 	{
 		//tempBuff sluzi za pomjeranje pokazivaca i citanje iduceg clana polinoma sve daok ne dodemo do kraja
 		tempBuff += bufferCounter;
-		scanInList(hp1,tempCoef,tempExp);
+		scanInList(headPoly1,tempCoef,tempExp);
 	}
 	//Spremanje drugog polinoma
 	fgets(buffer, MAX_LINE, filePointer);
@@ -108,229 +107,184 @@ int readFile(Position hp1, Position hp2)
 	while (sscanf(buffer + tempBuff, "%dx^%d %n", &tempCoef, &tempExp, &bufferCounter) == 2)
 	{
 		tempBuff += bufferCounter;
-		scanInList(hp2, tempCoef, tempExp);
+		scanInList(headPoly2, tempCoef, tempExp);
 	}
 
 	fclose(filePointer);
 	return EXIT_SUCCESS;
 }
 
-int scanInList(Position p, int coef, int exp)
+int scanInList(Position head, int coef, int exp)
 {
 	Position newElement = NULL,temp=NULL;
 	//Spremanje po velicini(od najveceg prema najmanjem)
-	while (p->Next != NULL && p->Next->Exp>exp) {
-		p = p->Next;
+	while (head->Next != NULL && head->Next->Exp>exp) {
+		head = head->Next;
 	}
-	if (p->Next==NULL || p->Next->Exp<exp) {
+	if (head->Next==NULL || head->Next->Exp<exp) {
 		//Ucitavanje novog elementa u listi i povezivanje s ostatkom liste
 		newElement = initialization(newElement);
 		newElement->Coeff = coef;
 		newElement->Exp = exp;
-		newElement->Next = p->Next;
-		p->Next = newElement;
+		newElement->Next = head->Next;
+		head->Next = newElement;
 	}
 	else
 	{
 		//Ako vec postoji clan s unesenim eksponentom
-		p->Next->Coeff += coef;
+		head->Next->Coeff += coef;
 		//Ako se dogodi da zbroj koeficijenta bude 0 brise se taj element
-		if (p->Next->Coeff == 0)
+		if (head->Next->Coeff == 0)
 		{
-			temp = p->Next->Next;
-			free(p->Next);
-			p->Next=temp;
+			temp = head->Next->Next;
+			free(head->Next);
+			head->Next=temp;
 		}
 	}
 
 	return EXIT_SUCCESS;
 }
 
-int printPoly(Position p)
+int printPoly(Position firstElement)
 {
 	//Provjera je li lista prazna
-	if (p == NULL)
+	if (firstElement == NULL)
 	{
 		printf("ERROR. Empty list.");
 		return EMPTY_LIST;
 	}
 
-	while (p->Next!= NULL)
+	while (firstElement->Next!= NULL)
 	{
-		if (p->Coeff < 0) {
+		if (firstElement->Coeff < 0) {
 			//Ako je koeficijen negativan stavljamo ga u zagrade
-			printf("(%dx^%d)+", p->Coeff, p->Exp);
-			p = p->Next;
+			printf("(%dx^%d)+", firstElement->Coeff, firstElement->Exp);
+			firstElement = firstElement->Next;
 		}
-		else if (p->Exp == 0)
+		else if (firstElement->Exp == 0)
 		{
 			//Ako je eksponent jednak 0 ispisujemo samo koeficijen jer je x^0=1
-			printf("%d+", p->Coeff);
-			p = p->Next;
+			printf("%d+", firstElement->Coeff);
+			firstElement = firstElement->Next;
 		}
 		else
 		{
 			//Inace ispisujemo u normalnom obliku do predzadnjeg clana
-			printf("%dx^%d+", p->Coeff, p->Exp);
-			p = p->Next;
+			printf("%dx^%d+", firstElement->Coeff, firstElement->Exp);
+			firstElement = firstElement->Next;
 		}
 	}
 	//zadnji clan ispisujemo posebno kako ne bismo imali + na kraju polinoma
-	printf("%dx^%d\n", p->Coeff, p->Exp);
+	printf("%dx^%d\n", firstElement->Coeff, firstElement->Exp);
 	return EXIT_SUCCESS;
 }
-int sumPoly(Position p1, Position p2, Position pSum)
+int sumPoly(Position Poly1, Position Poly2, Position PolySum)
 {
 	Position newElement = NULL;
 
-	while (p1->Next != NULL && p2->Next!=NULL)
+	while (Poly1->Next != NULL && Poly2->Next!=NULL)
 	{
-		if (p1->Next->Exp > p2->Next->Exp)
+		if (Poly1->Next->Exp > Poly2->Next->Exp)
 		{
 			newElement = initialization(newElement);
-			newElement->Coeff = p1->Next->Coeff;
-			newElement->Exp = p1->Next->Exp;
+			newElement->Coeff = Poly1->Next->Coeff;
+			newElement->Exp = Poly1->Next->Exp;
 			//"Dodaj na kraj liste"
-			while (pSum->Next !=NULL)
-				pSum = pSum->Next;
-			newElement->Next = pSum->Next;
-			pSum->Next = newElement;
+			while (PolySum->Next !=NULL)
+				PolySum = PolySum->Next;
+			newElement->Next = PolySum->Next;
+			PolySum->Next = newElement;
 			//p1 pomjeramo za jedno mjesto jer smo upisali element iz p1
-			p1 = p1->Next;
+			Poly1 = Poly1->Next;
 		}
-		else if (p1->Next->Exp < p2->Next->Exp)
+		else if (Poly1->Next->Exp < Poly2->Next->Exp)
 		{
 			newElement = initialization(newElement);
-			newElement->Coeff = p2->Next->Coeff;
-			newElement->Exp = p2->Next->Exp;
-			while (pSum->Next != NULL)
-				pSum = pSum->Next;
-			newElement->Next = pSum->Next;
-			pSum->Next = newElement;
+			newElement->Coeff = Poly2->Next->Coeff;
+			newElement->Exp = Poly2->Next->Exp;
+			while (PolySum->Next != NULL)
+				PolySum = PolySum->Next;
+			newElement->Next = PolySum->Next;
+			PolySum->Next = newElement;
 			//p2 pomjeramo za jedno mjesto jer smo upisali element iz p2
-			p2 = p2->Next;
+			Poly2 = Poly2->Next;
 		}
-		else if(p1->Next->Exp == p2->Next->Exp)
+		else if(Poly1->Next->Exp == Poly2->Next->Exp)
 		{
 			newElement = initialization(newElement);
-			newElement->Coeff = p2->Next->Coeff+p1->Next->Coeff;
-			newElement->Exp = p2->Next->Exp;
-			while (pSum->Next != NULL)
-				pSum = pSum->Next;
-			newElement->Next = pSum->Next;
-			pSum->Next = newElement;
+			newElement->Coeff = Poly2->Next->Coeff+Poly1->Next->Coeff;
+			newElement->Exp = Poly2->Next->Exp;
+			while (PolySum->Next != NULL)
+				PolySum = PolySum->Next;
+			newElement->Next = PolySum->Next;
+			PolySum->Next = newElement;
 			//Pomjeramo i p1 i p2 jer smo upisali oba elementa
-			p1 = p1->Next;
-			p2 = p2->Next;
+			Poly1 = Poly1->Next;
+			Poly2 = Poly2->Next;
 		}
 	}
 	//Petlja se izvodi u slucaju ako je p2 kraci od p1
-	if (p1->Next != NULL)
+	if (Poly1->Next != NULL)
 	{
-		while (p1->Next != NULL)
+		while (Poly1->Next != NULL)
 		{
 			newElement = initialization(newElement);
-			newElement->Coeff = p1->Next->Coeff;
-			newElement->Exp = p1->Next->Exp;
-			while (pSum->Next != NULL)
-				pSum = pSum->Next;
-			newElement->Next = pSum->Next;
-			pSum->Next = newElement;
-			p1 = p1->Next;
+			newElement->Coeff = Poly1->Next->Coeff;
+			newElement->Exp = Poly1->Next->Exp;
+			while (PolySum->Next != NULL)
+				PolySum = PolySum->Next;
+			newElement->Next = PolySum->Next;
+			PolySum->Next = newElement;
+			Poly1 = Poly1->Next;
 		}
 	}
 	//Petlja se izvodi u slucaju ako je p1 kraci od p2
-	if (p2->Next != NULL)
+	if (Poly2->Next != NULL)
 	{
-		while (p2->Next != NULL)
+		while (Poly2->Next != NULL)
 		{
 			newElement = initialization(newElement);
-			newElement->Coeff = p2->Next->Coeff;
-			newElement->Exp = p2->Next->Exp;
-			while (pSum->Next != NULL)
-				pSum = pSum->Next;
-			newElement->Next = pSum->Next;
-			pSum->Next = newElement;
-			p2 = p2->Next;
+			newElement->Coeff = Poly2->Next->Coeff;
+			newElement->Exp = Poly2->Next->Exp;
+			while (PolySum->Next != NULL)
+				PolySum = PolySum->Next;
+			newElement->Next = PolySum->Next;
+			PolySum->Next = newElement;
+			Poly2 = Poly2->Next;
 		}
-	}
-	return EXIT_SUCCESS;
-}
-int multiPoly(Position p1, Position p2, Position pMulti)
-{
-	Position newElement = NULL;
-	Position temp = NULL;
-	temp = p2;
-	//Mnozenje "svaki sa svakim"
-	while (p1 != NULL)
-	{
-		while (p2 != NULL) {
-			newElement = initialization(newElement);
-			newElement->Exp = p1->Exp + p2->Exp;
-			newElement->Coeff = p1->Coeff * p2->Coeff;
-			newElement->Next = pMulti->Next;
-			pMulti->Next = newElement;
-			p2 = p2->Next;
-		}
-		p2 = temp;
-		p1 = p1->Next;
-	}
-	//Sortiranje dobivene liste
-	sort(pMulti);
-	return EXIT_SUCCESS;
-}
-int sort(Position p)
-{
-	Position j, prev_j, temp, end, i=NULL;
-	//Bubble sort
-	end = NULL;
-	while (p->Next != end)
-	{
-		prev_j = p;
-		j = p->Next;
-		while (j->Next != end)
-		{
-			if (j->Exp < j->Next->Exp)
-			{
-				temp = j->Next;
-				prev_j->Next = temp;
-				j->Next = temp->Next;
-				temp->Next = j;
-				j = temp;
-			}
-			prev_j = j;
-			j = j->Next;
-		}
-		end = j;
-	}
-	//U slucaju ako se pojavi vise elemenata s istim eksponentom reduciramo njihov broj kao i kod unosa
-	i = initialization(i);
-	while (p->Next->Next != NULL)
-	{
-		i = p->Next;
-		if (i->Exp == i->Next->Exp)
-		{
-			temp = i->Next;
-			i->Coeff += temp->Coeff;
-			i->Next = temp->Next;
-			free(temp);
-		}
-		p = p->Next;
-		
 	}
 	return EXIT_SUCCESS;
 }
 
-int deleteAll(Position p)
+int deleteAll(Position head)
 {
 	Position temp = NULL;
-	while (p ->Next!= NULL)
+	while (head ->Next!= NULL)
 	{
-		temp = p->Next;
-		p->Next = temp->Next;
+		temp = head->Next;
+		head->Next = temp->Next;
 		free(temp);
 	}
-	free(p);
+	free(head);
+
+	return EXIT_SUCCESS;
+}
+
+int multiPoly(Position Poly1, Position Poly2, Position Result)
+{
+	Position temp = NULL;
+	temp = Poly2;
+	//Mnozenje "svaki sa svakim"
+	while (Poly1 != NULL)
+	{
+		Poly2 = temp;
+		while (Poly2 != NULL) {
+			//Sortirani unos pomocu vec napisane funkcije
+			scanInList(Result, Poly1->Coeff * Poly2->Coeff, Poly1->Exp+Poly2->Exp);
+			Poly2 = Poly2->Next;
+		}
+		Poly1 = Poly1->Next;
+	}
 
 	return EXIT_SUCCESS;
 }
