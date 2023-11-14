@@ -26,6 +26,7 @@ int stackLogic(Position ,char* );
 int push(Position, int);
 int doOperation(Position, char);
 int pull(Position);
+int delete(Position);
 
 
 int main()
@@ -36,11 +37,11 @@ int main()
 
 	result=calculate(head);
 	//Provjera postoji li nepredviden clan u postfiksu
-	if (result = OPERATION_ERROR)
+	if (result == OPERATION_ERROR)
 		return OPERATION_ERROR;
+
 	printf("%d", result);
 	free(head);
-
 	return EXIT_SUCCESS;
 }
 
@@ -70,7 +71,7 @@ int calculate(Position head)
 	//Postavljamo head->Next na NULL ptr
 	head->Next = head->Next->Next;
 	//Oslobadamo "prvi pravi" clan 
-	free(head->Next);
+	delete(head);
 	return result;
 }
 
@@ -162,6 +163,7 @@ int doOperation(Position head, char mathOperation)
 			break;
 		default:
 			printf("ERROR. Wrong operation!\n");
+			delete(head);
 			return OPERATION_ERROR;
 	}
 	return EXIT_SUCCESS;
@@ -177,4 +179,17 @@ int pull(Position head)
 	free(temp);
 
 	return tempVal;
+}
+int delete(Position head)
+{
+	Position temp = NULL;
+	
+	while (head->Next != NULL)
+	{
+		temp = head->Next;
+		head->Next = temp->Next;
+		free(temp);
+	}
+
+	return EXIT_SUCCESS;
 }
