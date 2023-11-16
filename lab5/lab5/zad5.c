@@ -11,6 +11,7 @@ rezultat. Stog je potrebno realizirati preko vezane liste. */
 #define FILE_ERROR (-1)
 #define MALLOC_ERROR (NULL)
 #define OPERATION_ERROR (999888777)
+#define ZERO_DIVIDE (888777666)
 
 struct _stack;
 typedef struct _stack* Position;
@@ -26,7 +27,7 @@ int stackLogic(Position ,char* );
 int push(Position, int);
 int doOperation(Position, char);
 int pull(Position);
-int delete(Position);
+int deleteAll(Position);
 
 
 int main()
@@ -39,6 +40,8 @@ int main()
 	//Provjera postoji li nepredviden clan u postfiksu
 	if (result == OPERATION_ERROR)
 		return OPERATION_ERROR;
+	if (result == ZERO_DIVIDE)
+		return ZERO_DIVIDE;
 
 	printf("%d", result);
 	free(head);
@@ -66,12 +69,14 @@ int calculate(Position head)
 	check=stackLogic(head, buffer);
 	if (check == OPERATION_ERROR)
 		return OPERATION_ERROR;
+	if (check == ZERO_DIVIDE)
+		return ZERO_DIVIDE;
 	//result = element prvog clana niza
 	result = head->Next->Element;
 	//Postavljamo head->Next na NULL ptr
 	head->Next = head->Next->Next;
 	//Oslobadamo "prvi pravi" clan 
-	delete(head);
+	deleteAll(head);
 	return result;
 }
 
@@ -112,11 +117,16 @@ int stackLogic(Position head, char* buffer)
 		else
 		{
 			sscanf(tempBuffer, "%c %n", &tempChar, &bufferCounter);
-			//izvodimo zadanu operaciju
-			check=doOperation(head, tempChar);
-			if (check == OPERATION_ERROR) {
+			//Provjera nalati li se u postfis izrazu nezeljeni clan
+			if (tempChar != '+' && tempChar != '-' && tempChar != '*' && tempChar != '/') {
+				printf("ERROR. Wrong operation!\n");
+				deleteAll(head);
 				return OPERATION_ERROR;
 			}
+			//izvodimo zadanu operaciju
+			check=doOperation(head, tempChar);
+			if (check == ZERO_DIVIDE)
+				return ZERO_DIVIDE;
 		}
 		//pomjeramo za procitani element
 		tempBuffer += bufferCounter;
@@ -158,13 +168,16 @@ int doOperation(Position head, char mathOperation)
 			push(head, ele1);
 			break;
 		case '/':
+			if (ele1 == 0)
+			{
+				printf("ERROR. Dividing by zero. Check postfix!\n");
+				deleteAll(head);
+				return ZERO_DIVIDE;
+				break;
+			}
 			ele1 = ele2 / ele1;
 			push(head, ele1);
 			break;
-		default:
-			printf("ERROR. Wrong operation!\n");
-			delete(head);
-			return OPERATION_ERROR;
 	}
 	return EXIT_SUCCESS;
 }
@@ -180,7 +193,7 @@ int pull(Position head)
 
 	return tempVal;
 }
-int delete(Position head)
+int deleteAll(Position head)
 {
 	Position temp = NULL;
 	
