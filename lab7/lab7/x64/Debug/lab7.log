@@ -1,0 +1,4 @@
+﻿  zad7.c
+C:\Users\Kreso\.ssh\Strukture\lab7\lab7\zad7.c(62,23): warning C4133: '!=': incompatible types - from 'positionStack' to 'positionDirectory'
+C:\Users\Kreso\.ssh\Strukture\lab7\lab7\zad7.c(195,3): warning C4047: 'return': 'int' differs in levels of indirection from 'void *'
+  lab7.vcxproj -> C:\Users\Kreso\.ssh\Strukture\lab7\x64\Debug\lab7.exe
