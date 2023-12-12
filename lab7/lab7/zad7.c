@@ -10,6 +10,7 @@ korištenje DOS naredbi: 1- "md", 2 - "cd dir", 3 - "cd..", 4 - "dir" i 5 – iz
 #include<string.h>
 
 #define MAX_NAME (100)
+#define MALLOC_ERROR (-2)
 
 typedef struct _directory* positionDirectory;
 typedef struct _directory {
@@ -25,20 +26,23 @@ typedef struct _stack {
 }Stack;
 
 
-int menu();
+char menu();
 //FUNKCIJE STABLA
 positionDirectory makeDirectory(char name[MAX_NAME]);
 positionDirectory makeSubdirectory(positionDirectory);
 positionDirectory enterInSubdirectory(positionDirectory);
 int listDirectory(positionDirectory);
+int deleteAllDirectory(positionDirectory);
 //FUNKCIJE STOGA
 int push(positionStack, positionDirectory);
 positionDirectory pop(positionStack);
+int deleteStack(positionStack);
 
 int main()
 {
 	Directory headDirectory = { .name = {0}, .next=NULL, .subDirectory=NULL };
-	int function = 0,end=1;
+	char function = 0;
+	int end = 1;
 	positionDirectory root = NULL, currentDirectory=NULL;
 	root =makeDirectory("C:");
 	headDirectory.next=root;
@@ -47,63 +51,64 @@ int main()
 	
 	push(&headStack, currentDirectory);
 
-	do
+	while(end)
 	{
 		function = menu();
 		switch (function)
 		{
-		case 1:
+		case '1':
 			
 			currentDirectory->subDirectory=makeSubdirectory(currentDirectory);
 			break;
 		
-		case 2:
+		case '2':
 			currentDirectory=enterInSubdirectory(currentDirectory);
 			if(currentDirectory!=headStack.next)
 				push(&headStack, currentDirectory);
 			printf("CURRENT IN: %s\n", currentDirectory->name);
 			break;
-		case 3:
+		case '3':
 			if (currentDirectory == root)
 			{
 				printf("You are in the root directory.\n");
+				break;
 			}
 			else
 			{
-				currentDirectory = pop(&headStack);
-				printf("CURRENT IN: %s\n", currentDirectory->name);
+				if (currentDirectory = pop(&headStack)) {
+					currentDirectory = headStack.next->element;
+					printf("CURRENT IN: %s\n", currentDirectory->name);
+				}
+				break;
 			}
-			break;
-		case 4:
+		case '4':
 			listDirectory(currentDirectory);
 			break;
-		case 5:
+		case '5':
 			printf("END OF PROGRAM");
-			return 0;
+			deleteAllDirectory(headDirectory.next);
+			deleteStack(&headStack);
+			end = 0;
+			break;
+		default:
+			if (function <= 49 || function >= 54)
+				printf("Wrong input. Try again.\n\n");
 			break;
 		}
-	} while (end);
+	}
 	return EXIT_SUCCESS;
 }
 
-int menu()
+char menu()
 {
-	int a = 0;
-	while (a == 0)
-	{
-		printf("\nZa unos novog direktorija unesite '1'\nZa ulazak u poddirektorij unesite '2'\nZa povratak u prethodni direktorij unesite '3'\nZa ispis sadrzaja direktorija unesite '4'\nZa izlaz unesite '5'\n");
-		scanf("%d", &a);
-		if (a <= 0 || a >= 6)
-		{
-			printf("Wrong input. Try again.\n\n");
-			a = 0;
-		}
-	}
-	return a;
+	char character = 0;
+
+	printf("\nTo enter a new directory, enter '1'\nTo enter a subdirectory, enter '2'\nTo return to the previous directory, enter '3'\nTo print the contents of the directory, enter '4'\nTo exit, enter '5'\n");
+	scanf(" %c", &character);
+	return character;
 }
 
 //FUNKCIJA ZA STABLO
-
 positionDirectory makeDirectory(char name[MAX_NAME])
 {
 	positionDirectory newDirectory = NULL;
@@ -119,27 +124,18 @@ positionDirectory makeDirectory(char name[MAX_NAME])
 
 	return newDirectory;
 }
-
 positionDirectory makeSubdirectory(positionDirectory currentDirectory)
 {
 	positionDirectory newSubdirectory = NULL;
 	newSubdirectory = (positionDirectory)malloc(sizeof(Directory));
 	char subdirectoryName[MAX_NAME] = { 0 };
-	printf("trenutno si u %s\n", currentDirectory->name);
 	printf("Insert name of the directory: ");
 	scanf("%s",newSubdirectory->name );
 	newSubdirectory->next = currentDirectory->subDirectory;
 	newSubdirectory->subDirectory = NULL;
-	//currentDirectory->subDirectory = newSubdirectory;
-	/*scanf("%s", subdirectoryName);
-	newSubdirectory=makeDirectory(subdirectoryName);
-
-	newSubdirectory->next = currentDirectory->subDirectory;
-	currentDirectory->subDirectory = newSubdirectory;*/
 
 	return newSubdirectory;
 }
-
 positionDirectory enterInSubdirectory(positionDirectory currentDirectory)
 {
 	char subdirectoryName[MAX_NAME] = {0};
@@ -164,26 +160,38 @@ positionDirectory enterInSubdirectory(positionDirectory currentDirectory)
 }
 int listDirectory(positionDirectory currentDirectory)
 {
-	if (currentDirectory->subDirectory != NULL)
+	positionDirectory tempDirectory = NULL;
+	tempDirectory = currentDirectory->subDirectory;
+	if (tempDirectory != NULL)
 	{
+		printf("YOU ARE IN  '%s' DIRECTORY \n", currentDirectory->name);
 		printf("This directory contain following subdirectories:\n");
-		while (currentDirectory->subDirectory != NULL)
+		while (tempDirectory != NULL)
 		{
-			printf("%s	", currentDirectory->subDirectory->name);
-			currentDirectory->subDirectory = currentDirectory->subDirectory->next;
+			printf("%s	", tempDirectory->name);
+			tempDirectory = tempDirectory->next;
 		}
 		printf("\n");
 	}
 	else
 		printf("This directory is empty!\n");
+	
 
+
+	return EXIT_SUCCESS;
+}
+int deleteAllDirectory(positionDirectory headDirectory)
+{
+	if (headDirectory == NULL)
+		return EXIT_SUCCESS;
+	deleteAllDirectory(headDirectory->next);
+	deleteAllDirectory(headDirectory->subDirectory);
+	free(headDirectory);
 	return EXIT_SUCCESS;
 }
 
 
-
 //FUNKCIJE ZA STOG
-
 int push(positionStack head, positionDirectory currentDirectory)
 {
 	positionStack newElement = NULL;
@@ -192,7 +200,7 @@ int push(positionStack head, positionDirectory currentDirectory)
 	if (newElement == NULL)
 	{
 		printf("ERROR. Memory allocation problem.\n");
-		return NULL;
+		return MALLOC_ERROR;
 	}
 	newElement->element = currentDirectory;
 	newElement->next = head->next;
@@ -202,11 +210,10 @@ int push(positionStack head, positionDirectory currentDirectory)
 }
 positionDirectory pop(positionStack headStack)
 {
-	//headStack = headStack->next;
 	positionStack tempElement = NULL;
 	positionDirectory currentDirectory=NULL;
 	tempElement = headStack->next;
-	if (tempElement==NULL)
+	if (tempElement == NULL)
 	{
 		printf("Stack is empty.\n");
 		return NULL;
@@ -214,6 +221,17 @@ positionDirectory pop(positionStack headStack)
 	headStack->next = tempElement->next;
 	currentDirectory = tempElement->element;
 	free(tempElement);
-
+	
 	return currentDirectory;
+}
+int deleteStack(positionStack headStack)
+{
+	positionStack toDelete = NULL;
+	while (headStack->next != NULL)
+	{
+		toDelete = headStack->next;
+		headStack->next = toDelete->next;
+		free(toDelete);
+	}
+	return EXIT_SUCCESS;
 }
