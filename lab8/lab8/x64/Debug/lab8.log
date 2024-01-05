@@ -1,2 +1,7 @@
 ﻿  zad8.c
+C:\Users\Kreso\.ssh\Strukture\lab8\lab8\zad8.c(111,25): warning C4013: 'random' undefined; assuming extern returning int
+C:\Users\Kreso\.ssh\Strukture\lab8\lab8\zad8.c(219,4): warning C4047: 'return': 'int' differs in levels of indirection from 'void *'
+C:\Users\Kreso\.ssh\Strukture\lab8\lab8\zad8.c(274,29): warning C4133: 'function': incompatible types - from 'PositionInList' to 'Position'
+C:\Users\Kreso\.ssh\Strukture\lab8\lab8\zad8.c(274,13): warning C4133: '=': incompatible types - from 'Position' to 'PositionInList'
+C:\Users\Kreso\.ssh\Strukture\lab8\lab8\zad8.c(370,4): warning C4047: 'return': 'int' differs in levels of indirection from 'void *'
   lab8.vcxproj -> C:\Users\Kreso\.ssh\Strukture\lab8\x64\Debug\lab8.exe
