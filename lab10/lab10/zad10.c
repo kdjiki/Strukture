@@ -1,14 +1,19 @@
-﻿/*10. Napisati program koji čita datoteku drzave.txt u kojoj su zapisani nazivi pojedinih država. Uz
+﻿/*	10. Napisati program koji čita datoteku drzave.txt u kojoj su zapisani nazivi pojedinih država. Uz
 ime države u datoteci se nalazi i ime dodatne datoteke u kojoj se nalaze gradovi pojedine
 države. Svaka datoteka koja predstavlja državu sadrži popis gradova u formatu naziv_grada,
 broj_stanovnika.
-a) Potrebno je formirati sortiranu vezanu listu država po nazivu. Svaki čvor vezane liste
-sadrži stablo gradova sortirano po broju stanovnika, zatim po nazivu grada.
-b) Potrebno je formirati stablo država sortirano po nazivu. Svaki čvor stabla sadrži vezanu
-listu gradova sortiranu po broju stanovnika, zatim po nazivu grada.
+	a) Potrebno je formirati sortiranu vezanu listu država po nazivu. Svaki čvor vezane liste
+	sadrži stablo gradova sortirano po broju stanovnika, zatim po nazivu grada.
+	b) Potrebno je formirati stablo država sortirano po nazivu. Svaki čvor stabla sadrži vezanu
+	listu gradova sortiranu po broju stanovnika, zatim po nazivu grada.
 Nakon formiranja podataka potrebno je ispisati države i gradove te omogućiti korisniku putem
 tastature pretragu gradova određene države koji imaju broj stanovnika veći od unosa na
-tastaturi.*/
+tastaturi.
+	11. Prepraviti zadatak 10 na način da se formira hash tablica država. Tablica ima 11 mjesta, a
+funkcija za preslikavanje ključ računa da se zbraja ASCII vrijednost prvih pet slova države zatim
+računa ostatak cjelobrojnog dijeljenja te vrijednosti s veličinom tablice. Države s istim ključem se
+pohranjuju u vezanu listu sortiranu po nazivu države. Svaki čvor vezane liste sadrži stablo
+gradova sortirano po broju stanovnika, zatim po nazivu grada.*/
 
 #define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
@@ -17,6 +22,7 @@ tastaturi.*/
 
 #define MAX_LENGHT (1024)
 #define FILE_ERROR (-3)
+#define HASH_TABLE_SIZE (11)
 
 typedef struct _city* cityPosition;
 typedef struct _city {
@@ -36,51 +42,73 @@ typedef struct _country {
 	countryPosition right;
 }Country;
 
+typedef struct _hash* hashPosition;
+typedef struct _hash {
+	countryPosition table[HASH_TABLE_SIZE];
+}Hash;
+
+//ZAJEDNICKE FUNKCIJE
 countryPosition initializationOfCountry(countryPosition);
-countryPosition creatingTheListOfCountry(countryPosition, char*, char*);
+cityPosition initializationOfCity(cityPosition);
+int deleteAll(countryPosition);
+//FUNKCIJE KORISTENE ZA PRETRAGU
 int find(countryPosition);
 int treePrint(cityPosition, int);
-
+//FUNKCIJE VEZANE ZA ZADATAK OID a)
+countryPosition creatingTheListOfCountries(countryPosition, char*, char*);
 cityPosition creatingTheTreeOfCities(cityPosition, char* , int );
-cityPosition initializationOfCity(cityPosition);
 int printCountryList(countryPosition);
-int printfCityTree(cityPosition);
-
+int printCityTree(cityPosition);
+countryPosition deleteListOfCountries(countryPosition);
+cityPosition deleteTreeOfCities(cityPosition);
+//FUNKCIJE VEZANE ZA ZADATAK POD b)
 countryPosition creatingTheTreeOfCountries(countryPosition, char*, char*);
 cityPosition creatingTheListOfCities(cityPosition, char*, int );
 int printCountryTree(countryPosition);
 int printCityList(cityPosition);
+countryPosition deleteTreeOfCounties(countryPosition);
+cityPosition deleteListOfCities(cityPosition);
+//FUNKCIJE ZA HASH
+hashPosition creatingHash(hashPosition);
+hashPosition fillingTheHash(hashPosition, char* , char*);
+countryPosition setCountryInHash(countryPosition, char* , char*);
+int printHash(hashPosition);
+int deleteHash(hashPosition);
 
 int main()
 {
 	countryPosition head = NULL;
 	head = initializationOfCountry(head);
 	FILE* filePointer = NULL;
+	hashPosition hashHead = NULL;
+	hashHead = creatingHash(hashHead);
 	filePointer = fopen("drzave.txt", "r");
 	if (filePointer == NULL) {
 		printf("ERROR. Unable to open file.\n");
 		return FILE_ERROR;
 	}
-
 	char countryName[MAX_LENGHT] = { 0 };
 	char countryFile[MAX_LENGHT] = { 0 };
 
 	while (!feof(filePointer))
 	{
 		fscanf(filePointer, "%s %s", countryName, countryFile);
-		head = creatingTheListOfCountry(head, countryName, countryFile);
+		head = creatingTheListOfCountries(head, countryName, countryFile);
 		head->left = creatingTheTreeOfCountries(head->left, countryName, countryFile);
+		hashHead = fillingTheHash(hashHead, countryName, countryFile);
 	}
-	printf("a)\n");
+	printf("10.  a) lista drzava, stabla gradova\n");
 	printCountryList(head->next);
-	printf("\n______________\nb)\n");
+	printf("\n______________\n10.  b) stablo drzava, liste gradova\n");
 	printCountryTree(head->left);
+	printf("\n______________\n11.) hash\n");
+	printHash(hashHead);
 
 	find(head);
 
-
 	fclose(filePointer);
-
+	deleteAll(head);
+	deleteHash(hashHead);
 	return EXIT_SUCCESS;
 }
 
@@ -99,7 +127,7 @@ countryPosition initializationOfCountry(countryPosition newElement)
 
 	return newElement;
 }
-countryPosition creatingTheListOfCountry(countryPosition head, char* countryName, char* cityFileName)
+countryPosition creatingTheListOfCountries(countryPosition head, char* countryName, char* cityFileName)
 {
 	FILE* filePointer = NULL;
 	countryPosition currentCountry = NULL,newCountry=NULL;
@@ -159,19 +187,19 @@ int printCountryList(countryPosition head)
 	while (head != NULL)
 	{
 		printf("\n%s", head->name);
-		printfCityTree(head->citiesOfTheCountry);
+		printCityTree(head->citiesOfTheCountry);
 		printf("\n");
 		head = head->next;
 	}
 	return EXIT_SUCCESS;
 }
-int printfCityTree(cityPosition root)
+int printCityTree(cityPosition root)
 {
 	if (root != NULL)
 	{
-		printfCityTree(root->left);
+		printCityTree(root->left);
 		printf("\n%s - %d", root->name, root->population);
-		printfCityTree(root->right);
+		printCityTree(root->right);
 	}
 	return EXIT_SUCCESS;
 }
@@ -271,6 +299,7 @@ int find(countryPosition head)
 		rootCity = current->citiesOfTheCountry;
 		printf("\nPopis gradova s vecom populacijom od %d:", findPopulation);
 		treePrint(rootCity, findPopulation);
+		printf("\n");
 	}
 	else
 		printf("\nPogresan unos, molimo pripazite na veliko i malo slovo!\n");
@@ -284,5 +313,140 @@ int treePrint(cityPosition nodeCity, int findPopulation)
 			printf("\n%s - %d", nodeCity->name, nodeCity->population);
 		treePrint(nodeCity->right, findPopulation);
 	}
+	return EXIT_SUCCESS;
+}
+hashPosition creatingHash(hashPosition hashTable)
+{
+	int i = 0;
+	hashTable = (hashPosition)malloc(sizeof(Hash));
+	if (hashTable == NULL)
+	{
+		printf("ERROR. Unable to allocate memory.\n");
+		return NULL;
+	}
+	for (i = 0; i < HASH_TABLE_SIZE; i++)
+		hashTable->table[i] = initializationOfCountry(hashTable->table[i]);
+	return hashTable;
+}
+hashPosition fillingTheHash(hashPosition hashHead, char* countryName, char* countryFile)
+{
+	int positionASCII = 0;
+	int i = 0;
+	for (i = 0; i < 5;i++) {
+		if (countryName[i] != '\0')
+			positionASCII += (int)countryName[i];
+		else
+			break;
+	}
+	positionASCII = positionASCII % HASH_TABLE_SIZE;
+	hashHead->table[positionASCII] = setCountryInHash(hashHead->table[positionASCII], countryName, countryFile);
+
+	return hashHead;
+}
+countryPosition setCountryInHash(countryPosition head, char* countryName, char* countryFile)
+{
+	FILE* filePointer = NULL;
+	char cityName[MAX_LENGHT] = { 0 };
+	int cityPopulation = 0;
+	countryPosition currentCountry = NULL, newCountry=NULL;
+	currentCountry = head;
+	filePointer = fopen(countryFile, "r");
+	if (filePointer == NULL) {
+		printf("ERROR. Unable to open file.\n");
+		return NULL;
+	}
+	while (currentCountry->next != NULL && strcmp(currentCountry->next->name, countryName) < 0)
+		currentCountry = currentCountry->next;
+	newCountry = initializationOfCountry(newCountry);
+	strcpy(newCountry->name, countryName);
+	while (!feof(filePointer))
+	{
+		fscanf(filePointer, " %s %d", cityName, &cityPopulation);
+		cityName[strlen(cityName) - 1] = '\0';
+		newCountry->citiesOfTheCountry = creatingTheTreeOfCities(newCountry->citiesOfTheCountry, cityName, cityPopulation);
+	}
+	newCountry->next = currentCountry->next;
+	currentCountry->next = newCountry;
+	fclose(filePointer);
+	return head;
+}
+int printHash(hashPosition head)
+{
+	int i = 0;
+	for (i; i < HASH_TABLE_SIZE; i++)
+	{
+		countryPosition currentCountry = NULL;
+		currentCountry = head->table[i]->next;
+		if ( currentCountry!= NULL)
+			while (currentCountry != NULL)
+			{
+				printf("\n%s", currentCountry->name);
+				printCityTree(currentCountry->citiesOfTheCountry);
+				printf("\n");
+				currentCountry = currentCountry->next;
+			}
+	}
+	return EXIT_SUCCESS;
+}
+int deleteAll(countryPosition head)
+{
+	head->next=deleteListOfCountries(head->next);
+	head->left = deleteTreeOfCounties(head->left);
+	free(head);
+	return EXIT_SUCCESS;
+}
+countryPosition deleteListOfCountries(countryPosition currentCountry)
+{
+	while (currentCountry != NULL) {
+		countryPosition temp = NULL;
+		currentCountry->citiesOfTheCountry=deleteTreeOfCities(currentCountry->citiesOfTheCountry);
+		temp = currentCountry->next;
+		free(currentCountry);
+		currentCountry = temp;
+	}
+	return currentCountry;
+}
+cityPosition deleteTreeOfCities(cityPosition root)
+{
+	if(root!=NULL)
+	{
+		root->left=deleteTreeOfCities(root->left);
+		root->right=deleteTreeOfCities(root->right);
+		free(root);
+	}
+	return root;
+}
+countryPosition deleteTreeOfCounties(countryPosition nodeCountry)
+{
+	if (nodeCountry != NULL)
+	{
+		nodeCountry->left = deleteTreeOfCounties(nodeCountry->left);
+		nodeCountry->right = deleteTreeOfCounties(nodeCountry->right);
+		nodeCountry->citiesOfTheCountry = deleteListOfCities(nodeCountry->citiesOfTheCountry);
+		free(nodeCountry);
+	}
+	return nodeCountry;
+}
+cityPosition deleteListOfCities(cityPosition currentCity)
+{
+	while (currentCity != NULL) {
+		cityPosition temp = NULL;
+		temp = currentCity->next;
+		free(currentCity);
+		currentCity = temp;
+	}
+	return currentCity;
+}
+int deleteHash(hashPosition hashHead)
+{
+	int i = 0;
+	for (i = 0; i < HASH_TABLE_SIZE; i++)
+	{
+		hashHead->table[i] = deleteListOfCountries(hashHead->table[i]);
+		free(hashHead->table[i]);
+	}
+	free(hashHead);
+
+
 	return EXIT_SUCCESS;
 }

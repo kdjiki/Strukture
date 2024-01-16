@@ -38,5 +38,8 @@
     <Text Include="austrija.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="bih.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -132,6 +132,7 @@
   <ItemGroup>
     <Text Include="austrija.txt" />
     <Text Include="belgija.txt" />
+    <Text Include="bih.txt" />
     <Text Include="drzave.txt" />
     <Text Include="hrvatska.txt" />
     <Text Include="italija.txt" />
